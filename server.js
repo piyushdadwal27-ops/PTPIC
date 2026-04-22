@@ -7,6 +7,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('.'));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -17,6 +18,11 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/submissions', require('./routes/submissions'));
+
+// Serve HTML frontend
+app.get('/app', (req, res) => {
+  res.sendFile(__dirname + '/ptpic_final.html');
+});
 
 // Test route
 app.get('/', (req, res) => {
