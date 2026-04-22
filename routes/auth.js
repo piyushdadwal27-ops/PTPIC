@@ -44,4 +44,31 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Get all users (leaderboard)
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find()
+      .select('-password')
+      .sort({ xp: -1 });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user role (admin only)
+router.put('/role/:id', async (req, res) => {
+  try {
+    const { role } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true }
+    ).select('-password');
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
