@@ -1544,7 +1544,7 @@ footer.sitefoot{background:var(--ink);color:#c5cdd9;padding:4rem 2rem 2rem}
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" class="form-input" placeholder="••••••••" id="login-password">
+          <input type="password" class="form-input" placeholder="••••••••" id="login-pw">
         </div>
         <button class="btn btn-dark btn-arrow" style="width:100%;justify-content:center;margin-top:1rem" onclick="doLogin()">Sign In</button>
         <p style="text-align:center;margin-top:1.5rem;font-size:0.88rem;color:var(--muted)">Don't have an account? <a style="color:var(--green-dark);font-weight:500" onclick="showPage('register')">Join PTPIC</a></p>
@@ -1610,7 +1610,7 @@ footer.sitefoot{background:var(--ink);color:#c5cdd9;padding:4rem 2rem 2rem}
         </div>
         <div class="form-group"><label class="form-label">Phone (Optional)</label><input type="tel" class="form-input" placeholder="+91 98765 43210"></div>
         <div class="form-group"><label class="form-label">LinkedIn URL (Optional)</label><input type="url" class="form-input" placeholder="https://linkedin.com/in/yourname"></div>
-        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" placeholder="••••••••" id="reg-password"></div>
+        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" placeholder="••••••••"></div>
         <p style="font-size:0.82rem;color:var(--muted);margin:1rem 0">Free to join · Open to all pharmacy students · <strong style="color:var(--green-dark)">No experience required</strong></p>
         <button class="btn btn-green btn-arrow" style="width:100%;justify-content:center;margin-top:0.5rem" onclick="doRegister()">Enroll Now</button>
         <p style="text-align:center;margin-top:1.5rem;font-size:0.88rem;color:var(--muted)">Already a member? <a style="color:var(--green-dark);font-weight:500" onclick="showPage('login')">Sign in</a></p>
@@ -2170,69 +2170,24 @@ function toggleCat(el){
   el.querySelector('.cat-ck').textContent = el.classList.contains('sel') ? '✓' : '';
 }
 
-const API = 'https://ptpic.vercel.app/api';
-
-async function doRegister(){
+function doRegister(){
   const name = document.getElementById('reg-name').value || 'New Member';
-  const email = document.getElementById('reg-email') ? document.getElementById('reg-email').value : name.toLowerCase().replace(' ','')+'@ptpic.com';
-  const password = document.getElementById('reg-password') ? document.getElementById('reg-password').value : '123456';
-  try{
-    showToast('⏳ Creating your account...');
-    const res = await fetch(`${API}/auth/register`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name, email, password})
-    });
-    const data = await res.json();
-    if(data.token){
-      currentUser = {...data.user, fullName:name, domain:'R&D', rank:'Trainee'};
-      try{ localStorage.setItem('ptpic_token', data.token); localStorage.setItem('ptpic_user', JSON.stringify(currentUser)); }catch(e){}
-      showToast(`🎉 Welcome, ${currentUser.name}! Your account is created.`);
-      setTimeout(()=>showPage('dashboard'), 800);
-    } else {
-      showToast('❌ ' + (data.message || 'Registration failed'));
-    }
-  } catch(e){
-    // Fallback to local if API fails
-    currentUser = {name:name.split(' ')[0], fullName:name, role:'student', domain:'R&D', xp:0, rank:'Trainee'};
-    showToast(`🎉 Welcome, ${currentUser.name}! Your account is created.`);
-    setTimeout(()=>showPage('dashboard'), 800);
-  }
+  currentUser = {name:name.split(' ')[0], fullName:name, role:'student', domain:'R&D', xp:0, rank:'Trainee'};
+  try{ localStorage.setItem('ptpic_user', JSON.stringify(currentUser)); }catch(e){}
+  showToast(`🎉 Welcome, ${currentUser.name}! Your account is created.`);
+  setTimeout(()=>showPage('dashboard'), 800);
 }
 
-async function doLogin(){
-  const email = (document.getElementById('login-email').value || 'aryan@ptpic.com').toLowerCase();
-  const password = document.getElementById('login-password') ? document.getElementById('login-password').value : '123456';
-  try{
-    showToast('⏳ Logging in...');
-    const res = await fetch(`${API}/auth/login`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email, password})
-    });
-    const data = await res.json();
-    if(data.token){
-      currentUser = {...data.user, fullName:data.user.name, domain:'R&D'};
-      try{ localStorage.setItem('ptpic_token', data.token); localStorage.setItem('ptpic_user', JSON.stringify(currentUser)); }catch(e){}
-      showToast(`👋 Welcome back, ${currentUser.name}`);
-      setTimeout(()=>{
-        if(currentUser.role === 'leader' || currentUser.role === 'admin') showPage('admin');
-        else showPage('dashboard');
-      }, 600);
-    } else {
-      showToast('❌ ' + (data.message || 'Login failed'));
-    }
-  } catch(e){
-    // Fallback
-    if(email.includes('admin') || email.includes('pyush')) setUser('admin');
-    else if(email.includes('leader') || email.includes('farhaan')) setUser('leader');
-    else setUser('aryan');
-    showToast(`👋 Welcome back, ${currentUser.name}`);
-    setTimeout(()=>{
-      if(currentUser.role === 'leader' || currentUser.role === 'admin') showPage('admin');
-      else showPage('dashboard');
-    }, 600);
-  }
+function doLogin(){
+  const email = (document.getElementById('login-email').value || 'aryan@isfcp.org').toLowerCase();
+  if(email.includes('admin') || email.includes('pyush')) setUser('admin');
+  else if(email.includes('leader') || email.includes('farhaan')) setUser('leader');
+  else setUser('aryan');
+  showToast(`👋 Welcome back, ${currentUser.name}`);
+  setTimeout(()=>{
+    if(currentUser.role === 'leader' || currentUser.role === 'admin') showPage('admin');
+    else showPage('dashboard');
+  }, 600);
 }
 
 function quickLogin(role){
@@ -2382,6 +2337,7 @@ function showDomainDetail(domId){
         </div>`).join('')}
     </div>
   `;
+  showPage('domain-detail');
 }
 
 function showToast(msg){
@@ -2783,152 +2739,6 @@ function showNewEventForm(){
 }
 function showMemberApprovalForm(){
   showToast('Use the Approve / Reject buttons on each pending row below');
-}
-
-/* ============================================================
-   BACKEND API FUNCTIONS
-   ============================================================ */
-const API_URL = 'https://ptpic.vercel.app/api';
-
-function getToken(){
-  try{ return localStorage.getItem('ptpic_token'); }catch(e){ return null; }
-}
-
-// Load real leaderboard from MongoDB
-async function loadRealLeaderboard(){
-  try{
-    const res = await fetch(`${API_URL}/auth/users`);
-    const users = await res.json();
-    if(users && users.length > 0){
-      const el = document.getElementById('lb-list');
-      if(!el) return;
-      el.innerHTML = users.map((u,i)=>{
-        const rankClass = i===0?'top1':i===1?'top2':i===2?'top3':'';
-        return `
-          <div class="leader-row">
-            <div class="leader-rank ${rankClass}">${i+1}</div>
-            <div class="leader-avatar" style="background:#4b9cd3">${u.name.charAt(0).toUpperCase()}</div>
-            <div class="leader-info">
-              <div class="leader-name">${u.name}</div>
-              <div class="leader-meta">
-                <span class="chip" style="background:#e7f0f9;color:#2b6cb0">${u.role}</span>
-                <span class="chip chip-outline">${u.rank}</span>
-              </div>
-            </div>
-            <div>
-              <div class="leader-xp">${(u.xp||0).toLocaleString()}</div>
-              <div class="leader-xp-sub">XP · #${i+1}</div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-  }catch(e){ console.log('Leaderboard fallback to local data'); }
-}
-
-// Load real tasks from MongoDB
-async function loadRealTasks(){
-  try{
-    const res = await fetch(`${API_URL}/tasks`);
-    const tasks = await res.json();
-    if(tasks && tasks.length > 0){
-      showToast(`📋 ${tasks.length} tasks loaded from database`);
-    }
-    return tasks;
-  }catch(e){ return []; }
-}
-
-// Create task from admin panel
-async function createTaskFromAdmin(){
-  const title = prompt('Task title:');
-  if(!title) return;
-  const description = prompt('Task description:');
-  if(!description) return;
-  const domain = prompt('Domain (R&D / Clinical / AI & Tech / Marketing):') || 'R&D';
-  const xpReward = parseInt(prompt('XP Reward:', '100')) || 100;
-  const token = getToken();
-  if(!token){ showToast('❌ Please login as admin first'); return; }
-  try{
-    const res = await fetch(`${API_URL}/tasks/create`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':token},
-      body: JSON.stringify({title, description, domain, xpReward, difficulty:'Medium'})
-    });
-    const data = await res.json();
-    if(data.task){
-      showToast(`✅ Task "${title}" created successfully! (+${xpReward} XP)`);
-    } else {
-      showToast('❌ ' + (data.message || 'Failed to create task'));
-    }
-  }catch(e){ showToast('❌ Error creating task'); }
-}
-
-// Submit a task
-async function submitTask(taskId){
-  const link = prompt('Paste your submission link (GitHub/Drive/etc):');
-  if(!link) return;
-  const token = getToken();
-  if(!token){ showToast('❌ Please login first'); return; }
-  try{
-    const res = await fetch(`${API_URL}/submissions/submit`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':token},
-      body: JSON.stringify({taskId, submissionLink:link})
-    });
-    const data = await res.json();
-    if(data.submission){
-      showToast('✅ Submission received! Awaiting admin review.');
-    } else {
-      showToast('❌ ' + (data.message || 'Submission failed'));
-    }
-  }catch(e){ showToast('❌ Error submitting task'); }
-}
-
-// Load submissions for admin
-async function loadAdminSubmissions(){
-  const token = getToken();
-  if(!token){ showToast('❌ Please login as admin'); return; }
-  try{
-    const res = await fetch(`${API_URL}/submissions/all`, {
-      headers:{'Authorization':token}
-    });
-    const submissions = await res.json();
-    if(submissions && submissions.length > 0){
-      showToast(`📋 ${submissions.length} submissions loaded`);
-    } else {
-      showToast('No submissions yet');
-    }
-    return submissions;
-  }catch(e){ return []; }
-}
-
-// Approve submission from admin panel
-async function approveSubmissionReal(submissionId, xpAwarded){
-  const token = getToken();
-  if(!token){ showToast('❌ Please login as admin'); return; }
-  try{
-    const res = await fetch(`${API_URL}/submissions/approve/${submissionId}`, {
-      method:'PUT',
-      headers:{'Content-Type':'application/json','Authorization':token},
-      body: JSON.stringify({xpAwarded, feedback:'Great work!'})
-    });
-    const data = await res.json();
-    if(data.submission){
-      showToast(`✅ Approved! +${xpAwarded} XP awarded`);
-    }
-  }catch(e){ showToast('❌ Error approving submission'); }
-}
-
-// Override showNewActivityForm to use real backend
-function showNewActivityForm(){
-  createTaskFromAdmin();
-}
-
-// Auto-load leaderboard when page changes
-const _origShowPage = showPage;
-function showPage(id){
-  _origShowPage(id);
-  if(id === 'leaderboard') setTimeout(loadRealLeaderboard, 300);
-  if(id === 'admin') setTimeout(loadAdminSubmissions, 300);
 }
 
 </script>
